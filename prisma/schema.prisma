@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String    @db.ObjectId 
+  type String
+  provider         String
+  providerAccountId  String
+  refresh_token       String?
+  access_token        String?
+  expires_at Int?
+  token_type String?
+  scope String?
+  id_token String?
+  session_state String?
+  user               User      @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  expires      DateTime
+  sessionToken String   @unique
+  accessToken  String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model User {
+  // common fields
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  slug String @unique @default(nanoid(5))
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  bio           String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role userRole @default(NOT_SET)
+
+  // companies
+  tagline String?
+  desc String?
+  founded String?
+  size String?
+  website String?
+  applications JobApplication[]
+  jobListings JobListing[]
+
+  // job seekers
+  salary String?
+  resume String?
+  skills String[]
+  experiences Experiences[]  // to be modified
+  jobDomain String? 
+
+  accounts      Account[]
+  sessions      Session[]
+}
+
+enum userRole {
+  NOT_SET
+  JOB_SEEKER
+  EMPLOYER
+  ADMIN
+}
+
+model VerificationRequest {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([identifier, token])
+}
+
+model Experiences {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
+  user User  @relation(fields: [userId], references:[id])
+  companyName String
+  startDate DateTime
+  endDate DateTime?
+  description String?
+  role String
+}
+
+model JobApplication {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  JobListingId String  @db.ObjectId
+  JobListing JobListing @relation(fields: [JobListingId], references:[id])
+  applicantId String @db.ObjectId
+  applicant User @relation(fields: [applicantId], references:[id])
+  name String
+  email String
+  resume String?
+  salary String
+  skills String[]
+  appliedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  status applicationStatus @default(PENDING)
+}
+
+enum applicationStatus {
+  PENDING
+  SELECT
+  SHORTLISTED
+  HIRED
+  REJECTED
+}
+
+model JobListing {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  applications JobApplication[]
+  employerId String @db.ObjectId
+  employer User @relation(fields: [employerId], references:[id])
+  title String
+  description String
+  location String
+  category String
+  salary String
+  keywords String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  views Int @default(0)
+  numApplications Int @default(0)
+  status JobListingStatus @default(HIRING)
+
+}
+
+enum JobListingStatus{
+  HIRING
+  HIRED
+  CLOSED
+}
