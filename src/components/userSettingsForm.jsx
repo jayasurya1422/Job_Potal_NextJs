@@ -12,7 +12,20 @@ function UserSettingsForm({onSave,preloadedData}) {
     const initialKeywords=useMemo(()=>{
         return preloadedData.skills || [];
     })
-    const [keywords,setKeywords]=useState(initialKeywords)
+    const [keywords,setKeywords]=useState(initialKeywords);
+    const preloadedExperiences = useMemo(()=>{
+        return preloadedData.experiences || [
+            {
+                companyName : '',
+                role : '',
+                startDate : new Date(Date.now()),
+                endDate : new Date(Date.now()),
+                description : ""
+    
+            }
+        ]
+    },[preloadedData])
+    const [experiences,setExperiences]=useState(preloadedExperiences);
 
     const [resumeUrl,setResumeUrl] = useState(preloadedData.resume || null)
     const { 
@@ -30,9 +43,13 @@ function UserSettingsForm({onSave,preloadedData}) {
             resume : preloadedData.resume || '',
         }
     });
+
+    useEffect(()=>{
+        console.log(preloadedData)
+    },[preloadedData])
     
     const onSubmit= async (data)=>{
-        await onSave(data);
+        await onSave({...data,experiences});
     }
 
     useEffect(()=>{
@@ -75,6 +92,28 @@ function UserSettingsForm({onSave,preloadedData}) {
             setValue('keywords',tempKeyWords);
             setKeywordWrite('')
         }
+    }
+
+    const addExperience = () => {
+        setExperiences([...experiences, {
+            companyName : '',
+            role : '',
+            startDate : new Date(Date.now()),
+            endDate :  new Date(Date.now()),
+            description : '',
+        }
+    ])
+    }
+    const removeExperience = (indexToRemove) => {
+        const tempExp=experiences.filter((_,index)=> index !== indexToRemove)
+        setExperiences(tempExp);
+
+    }
+    const handleExperienceChange = (index,field,value) => {
+        const tempExp = [...experiences];
+        tempExp[index] = {...tempExp[index],[field]:value};
+        setExperiences(tempExp);
+        console.log(experiences);
     }
     
   return (
@@ -122,6 +161,51 @@ function UserSettingsForm({onSave,preloadedData}) {
                     <div>
                         <label className='text-sm' htmlFor="salary">Your expected salary</label>
                         <Input placeholder="eg. 100000" {...register('salary')} id="salary"/>
+                    </div>
+                    <div className='experience-field space-y-3'>
+                        <h5 className='text-md'>Add your experiences:</h5>
+                            {experiences?.map((exp,index)=>{
+                                return <div key={exp.id} className='flex flex-col gap-2 border p-2 rounded-lg bg-gray-200/10'>
+                                    <div className='flex space-x-2'>
+                                    <Input 
+                                    placeholder="Company Name"
+                                    value={exp.companyName}
+                                    onChange={(e)=>handleExperienceChange(index,'companyName',e.target.value)}
+                                    />
+                                    <Input 
+                                    placeholder="Your Role"
+                                    value={exp.role}
+                                    onChange={(e)=>handleExperienceChange(index,'role',e.target.value)}
+                                    />
+                                    </div>
+                                    <div className='flex space-x-2'>
+                                    <Input 
+                                    placeholder="Joining Date"
+                                    type="date"
+                                    defaultValue={new Date(exp.endDate).toISOString().split('T')[0]}
+                                    onChange={(e)=>handleExperienceChange(index,'startDate',e.target.value)}
+                                    />
+                                    <Input 
+                                    placeholder="End Date"
+                                    type="date"
+                                    defaultValue={new Date(exp.endDate).toISOString().split('T')[0]}
+                                    onChange={(e)=>handleExperienceChange(index,'endDate',e.target.value)}
+                                    />
+                                    </div>
+                                    <Input 
+                                    placeholder="Description about job role"
+                                    className="block"
+                                    value={exp.description}
+                                    onChange={(e)=>handleExperienceChange(index,'description',e.target.value)}
+                                    />
+                                <Button variant="destructive" type="button" onClick={()=>removeExperience(index)}>
+                                    Remove Experience
+                                </Button>
+                                </div>
+                            })}
+                            <Button type="button"  onClick={addExperience}>
+                                Add Job experience
+                            </Button>
                     </div>
                 <Button type="submit">
                     Save

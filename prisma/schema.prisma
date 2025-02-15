@@ -48,6 +48,7 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   role userRole @default(NOT_SET)
+  location  String?
 
   // companies
   tagline String?
@@ -100,8 +101,8 @@ model Experiences {
 
 model JobApplication {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  JobListingId String  @db.ObjectId
-  JobListing JobListing @relation(fields: [JobListingId], references:[id])
+  jobListingId String  @db.ObjectId
+  jobListing JobListing @relation(fields: [jobListingId], references:[id])
   applicantId String @db.ObjectId
   applicant User @relation(fields: [applicantId], references:[id])
   name String
@@ -135,7 +136,7 @@ model JobListing {
   salary String
   keywords String[]
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   views Int @default(0)
   numApplications Int @default(0)
   status JobListingStatus @default(HIRING)

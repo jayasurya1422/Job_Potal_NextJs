@@ -9,7 +9,7 @@ async function OnboardingLayout({children}) {
     const userId=session?.user.id;
     if(!session || !session.user) return redirect('/sign-in')
     const onboardingStatus = await checkOnboarding(userId);
-    if(onboardingStatus!=='NOT_SET') return redirect('/jobs')
+    // if(onboardingStatus!=='NOT_SET') return redirect('/jobs')
   return <Onboarding userId={userId}/>
 }
 

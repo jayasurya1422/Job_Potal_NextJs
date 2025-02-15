@@ -16,7 +16,23 @@ async function SettingsPage() {
         return redirect('/sign-in')
     
     if(user.role=="EMPLOYER"){
-        return <CompanySettingsPage></CompanySettingsPage>
+        const preloadData = await prisma.user.findUnique({
+            where : {id:session.user.id},
+            select: { 
+                name: true,
+                slug: true,
+                email: true,
+                image: true,
+                role: true,
+                tagline: true,
+                desc: true,
+                founded: true,
+                size: true,
+                website: true,
+                location: true
+            }
+        })
+        return <CompanySettingsPage preloadData = {preloadData}/>
     } else if(user.role=="JOB_SEEKER"){
         const user= await prisma.user.findUnique({
             where : {id: session.user.id},
@@ -27,7 +43,8 @@ async function SettingsPage() {
                 bio:true,
                 resume : true,
                 skills : true,
-                salary : true
+                salary : true,
+                experiences:true
             }
         })
         return <UserSettingsPage user={user}/>

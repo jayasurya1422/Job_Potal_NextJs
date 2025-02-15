@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {Briefcase} from "lucide-react"
 export default function Navbar(){
-    const user_role='JOB_SEEKER';
+    const user_role='EMPLOYER';
     const navbarConfig={
         
         JOB_SEEKER:[
